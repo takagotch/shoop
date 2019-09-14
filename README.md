@@ -71,28 +71,28 @@ def test_multivariable_variation():
   color_var = ProductVariationVariable.objects.create(prodcut=parent, identifier="color")
   size_var = ProductVariationVariable.objects.create(product=parent, identifier="size")
   
-  for color in ():
-    ProductVariableValue.objects.create()
+  for color in ("yellow", "blue", "brown"):
+    ProductVariableValue.objects.create(variable=color_var, identifier=color)
     
-  for size in ():
-    ProductVariationVariableValue.objects.create()
+  for size in ("small", "medium", "large", "huge"):
+    ProductVariationVariableValue.objects.create(variable=size_var, identifier=size)
     
-  combinations = list()
+  combinations = list(get_all_available_combinations(parent))
   assert len(combinations) == (3 * 4)
   for combo in combinations:
-    assert not combo[]
-    if combo[].identifier == "small":
+    assert not combo["result_product_pk"]
+    if combo["variable_to_value"][color_var].identifier == "yellow" and combo["variable_to_value"][size_var].identifier == "small":
       continue
-    child = create_product()
-    child.link_to_parent()
+    child = create_product("xyz-%s" % combo["sku_part"])
+    child.link_to_parent(parent, combo["variable_to_value"])
   assert parent.mode == ProductMode.VARIABLE_VARIATION_PARENT
   
-  yellow_color_value = ProductVariationVariableValue.objects.get()
-  small_size_value = ProductVariationVariableValue.objects.get()
-  assert not ProductVariationResult.resolve()
+  yellow_color_value = ProductVariationVariableValue.objects.get(variable=color_var, identifier="yellow")
+  small_size_value = ProductVariationVariableValue.objects.get(variable=size_var, identifier="small")
+  assert not ProductVariationResult.resolve(parent, {color_var: yellow_color_value, size_var: small_size_value})
   
-  brown_color_value = ProductVariationVariableValue.objects.get()
-  result1 = ProductVariationResult.resolve()
+  brown_color_value = ProductVariationVariableValue.objects.get(variable=color_var, identifier="brown")
+  result1 = ProductVariationResult.resolve(parent, {color_var: brown_color_value, size_var: small_size_value})
   result2 = ProductVariationResult.resolve(parent, {color_var.pk: brown_color_value.pk size_var.pk: small_size_value.pk})
   assert result1 and result2
   assert result1.pk == result2.pk
